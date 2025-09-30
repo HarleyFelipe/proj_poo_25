@@ -10,7 +10,7 @@ class Arma(Modelo):
     nome = CharField()
     nivel = IntegerField()
     alcance = CharField()
-    municao = BooleanField()
+    municao = CharField(null=True)
     descricao = BlobField()
 
 class Classe(Modelo):
@@ -21,6 +21,7 @@ class Classe(Modelo):
 
 class Personagem(Modelo):
     nome = CharField()
+    descricao = TextField()
     classe = ForeignKeyField(Classe, on_delete='Cascade')
     arma = ForeignKeyField(Arma, null=True, on_delete='SET NULL')
 

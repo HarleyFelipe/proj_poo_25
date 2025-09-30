@@ -35,29 +35,43 @@ def limpar(pg):
 
 def salvar(pg): 
      if pg == armaFr:
-          nomeA = e_nomeA.get()
-          nivelA = int(e_nivelA.get())
-          alcanceA = e_alcanceA.get()
+          try:
+               nomeA = e_nomeA.get()
+               nivelA = int(e_nivelA.get())
+               alcanceA = e_alcanceA.get()
+               descricaoA =  t_descA.get("1.0",  "end-1c")
+          except:
+               mb.showerror("Erro", "Apenas a munição pode ser em branco!")
+               return
+          
           municaoA = e_municaoA.get()
-          descricaoA =  t_descA.get("1.0",  "end-1c")
 
           armaC = Arma.create(nome=nomeA, nivel=nivelA, alcance=alcanceA, municao=municaoA, descricao=descricaoA)
           limpar(armaFr)
 
      elif pg == classeFr:
-          nomeC = e_nomeC.get()
+          try:
+               nomeC = e_nomeC.get()  
+               descricaoC = t_descC.get("1.0",  "end-1c")
+          except:
+               mb.showerror("Erro", "Insira o Nome e/ou Descrição!")
+               return
+          
           bonusC = t_bonusC.get("1.0",  "end-1c")
           onusC = t_onusC.get("1.0",  "end-1c")
-          descricaoC = t_descC.get("1.0",  "end-1c")
 
           classeC = Classe.create(nome=nomeC, bonus=bonusC, onus=onusC, descricao=descricaoC)
           limpar(classeFr)
 
      elif pg == personagemFr:
-          nomeP = e_nomeP.get()
-          descricaoP = t_descP.get("1.0", "end-1c")
-          armaP = Arma.get(Arma.nome == c_armaP.get())
-          classeP = Classe.get(Classe.nome == c_classeP.get())
+          try:
+               nomeP = e_nomeP.get()
+               descricaoP = t_descP.get("1.0", "end-1c")
+               armaP = Arma.get(Arma.nome == c_armaP.get())
+               classeP = Classe.get(Classe.nome == c_classeP.get())
+          except:
+               mb.showerror("Erro", "Insira todos os valores!")
+               return
 
           personagemC = Personagem.create(nome=nomeP, descricao=descricaoP, arma=armaP, classe=classeP)
           limpar(personagemFr)
@@ -73,8 +87,11 @@ def atualizarLB(listB):
                lb_armaR.insert(tk.END, f">Nome      :  {arma.nome}")
                lb_armaR.insert(tk.END, f">Nível        :  {arma.nivel}")
                lb_armaR.insert(tk.END, f">Alcance   :  {arma.alcance}")
-               lb_armaR.insert(tk.END, f">Munição :  {arma.municao}")
-               lb_armaR.insert(tk.END, f">Descrição:  {arma.descricao}")     
+               try:
+                    lb_armaR.insert(tk.END, f">Munição :  {arma.municao}")
+               except:
+                    lb_armaR.insert(tk.END, f">Munição : Nenhuma")
+               lb_armaR.insert(tk.END, f">Descrição:  {arma.descricao.decode('utf-8')}")     
 
      elif listB == lb_classeR:
           lb_classeR.delete(0, tk.END)
@@ -84,9 +101,15 @@ def atualizarLB(listB):
           for classe in classeCad:
                lb_classeR.insert(tk.END, f"--------------------------------------------------------------------------------------------------------------------")
                lb_classeR.insert(tk.END, f">Nome       :  {classe.nome}")
-               lb_classeR.insert(tk.END, f">Bônus       :  {classe.bonus}")
-               lb_classeR.insert(tk.END, f">Ônus        :  {classe.onus}")
-               lb_classeR.insert(tk.END, f">Descrição:  {classe.descricao}")  
+               try:
+                    lb_classeR.insert(tk.END, f">Bônus       :  {classe.bonus.decode('utf-8')}")
+               except:
+                    lb_classeR.insert(tk.END, f">Bônus       :  Nenhum")
+               try:
+                    lb_classeR.insert(tk.END, f">Ônus        :  {classe.onus.decode('utf-8')}")
+               except:
+                    lb_classeR.insert(tk.END, f">Ônus        :  Nenhum")
+               lb_classeR.insert(tk.END, f">Descrição:  {classe.descricao.decode('utf-8')}")  
 
      elif listB == lb_persoR:
           lb_persoR.delete(0, tk.END)
@@ -96,14 +119,23 @@ def atualizarLB(listB):
           for perso in persoCad:
                lb_persoR.insert(tk.END, f"--------------------------------------------------------------------------------------------------------------------")
                lb_persoR.insert(tk.END, f">Nome      :  {perso.nome}")
-               lb_persoR.insert(tk.END, f">Descrição:  {perso.descricao}")  
-               lb_persoR.insert(tk.END, f">Arma       :  {perso.arma.nome}")
-               lb_persoR.insert(tk.END, f">Classe      :  {perso.classe.nome}")
-          
-def excluir(listB):
-     if listB == lb_armaR:
+               lb_persoR.insert(tk.END, f">Descrição:  {perso.descricao}")
+               try:
+                    lb_persoR.insert(tk.END, f">Arma       :  {perso.arma.nome}")
+               except:
+                    lb_persoR.insert(tk.END, f">Arma       :  Não possui")
+               lb_persoR.insert(tk.END, f">Classe      :  {perso.classe.nome}") 
 
-          slc = lb_armaR.curselection()[0]
+def atualizarCB():
+    c_armaP['values'] = [arma.nome for arma in Arma.select()]
+    c_classeP['values'] = [classe.nome for classe in Classe.select()]
+
+def excluir(listB):
+     slc = listB.curselection()
+     if not slc:
+          return
+     linha = listB.get(slc[0])
+     if listB == lb_armaR:
           linha = lb_armaR.get(slc)
 
           nomeEx = linha.split(":")[1].strip()
@@ -112,8 +144,6 @@ def excluir(listB):
           ex.delete_instance()
 
      elif listB == lb_classeR:
-
-          slc = lb_classeR.curselection()[0]
           linha = lb_classeR.get(slc)
 
           nomeEx = linha.split(":")[1].strip()
@@ -122,14 +152,14 @@ def excluir(listB):
           ex.delete_instance()
 
      elif listB == lb_persoR:
-
-          slc = lb_persoR.curselection()[0]
           linha = lb_persoR.get(slc)
 
           nomeEx = linha.split(":")[1].strip()
 
           ex = Personagem.get(Personagem.nome == nomeEx)
           ex.delete_instance()
+     
+     atualizarLB(listB)
 
 def editar2(pg):
      if pg == armaFr:
@@ -141,7 +171,7 @@ def editar2(pg):
           edt.save()
 
           limpar(armaFr)
-          relatorioFr.tkraise()
+          
 
      elif pg == classeFr:
           edt.nome = e_nomeC.get()
@@ -151,7 +181,7 @@ def editar2(pg):
           edt.save()
 
           limpar(classeFr)
-          relatorioFr.tkraise()
+          
 
      elif pg == personagemFr:
           edt.nome = e_nomeP.get()
@@ -161,14 +191,22 @@ def editar2(pg):
           edt.save()
 
           limpar(personagemFr)
-          relatorioFr.tkraise()
+     
+     pgRelatorio()
+
+def alterarBt():
+     b_salvarA.config(text="Salvar", command=lambda: (salvar(armaFr), atualizarLB(lb_armaR), atualizarCB()))
+     b_salvarC.config(text="Salvar", command=lambda: (salvar(classeFr), atualizarLB(lb_classeR), atualizarCB()))
+     b_salvarP.config(text="Salvar", command=lambda: (salvar(personagemFr), atualizarLB(lb_persoR)))
 
 def editar(listB):
     global edt
     edt = None
-    slc = listB.curselection()
 
-    linha = listB.get(slc[0])  
+    slc = listB.curselection()
+    if not slc:
+          return
+    linha = listB.get(slc[0]) 
     nome = linha.split(":")[1].strip()  
 
     if listB == lb_armaR:
@@ -185,7 +223,9 @@ def editar(listB):
         t_descA.insert("1.0", edt.descricao)
         pgArma()
         
-        b_salvarA.config(text="Editar", command=lambda: (editar2(armaFr), atualizarLB(lb_armaR)))
+        b_salvarA.config(text="Editar", command=lambda: (editar2(armaFr), atualizarLB(lb_armaR), alterarBt()))
+        
+
 
     elif listB == lb_classeR:
         edt = Classe.get(Classe.nome == nome)
@@ -199,7 +239,7 @@ def editar(listB):
         t_descC.insert("1.0", edt.descricao)
         pgClasse()
 
-        b_salvarC.config(text="Editar", command=lambda: (editar2(classeFr), atualizarLB(lb_classeR)))
+        b_salvarC.config(text="Editar", command=lambda: (editar2(classeFr), atualizarLB(lb_classeR), alterarBt()))
 
     elif listB == lb_persoR:
         edt = Personagem.get(Personagem.nome == nome)
@@ -211,7 +251,7 @@ def editar(listB):
         c_classeP.set(edt.classe.nome)
         pgPersonagem()
 
-        b_salvarP.config(text="Editar", command=lambda: (editar2(personagemFr), atualizarLB(lb_persoR)))
+        b_salvarP.config(text="Editar", command=lambda: (editar2(personagemFr), atualizarLB(lb_persoR), alterarBt()))
 
 janela = tk.Tk()
 janela.title("Elementaria")
@@ -260,10 +300,10 @@ lb_armaR = tk.Listbox(relatorioFr, width=30, height=7)
 lb_armaR.grid(padx=5, pady=5, column=0, row=2, sticky="ew", columnspan=3)
 atualizarLB(lb_armaR)
 
-b_editarR = tk.Button(relatorioFr, text="Editar", font=ft2, command=lambda: editar(lb_armaR))
-b_editarR.grid(padx=5, pady=5, column=1, row=1, sticky="ew")
-b_excluirR = tk.Button(relatorioFr, text="Excluir", font=ft2, command=lambda: (excluir(lb_armaR), atualizarLB(lb_armaR)))
-b_excluirR.grid(padx=5, pady=5, column=2, row=1, sticky="ew")
+b_editarAR = tk.Button(relatorioFr, text="Editar", font=ft2, command=lambda: editar(lb_armaR))
+b_editarAR.grid(padx=5, pady=5, column=1, row=1, sticky="ew")
+b_excluirAR = tk.Button(relatorioFr, text="Excluir", font=ft2, command=lambda: (excluir(lb_armaR), atualizarLB(lb_armaR)))
+b_excluirAR.grid(padx=5, pady=5, column=2, row=1, sticky="ew")
 
 l_classeR = tk.Label(relatorioFr, text="Classes", font=ft2, justify="left")
 l_classeR.grid(padx=5, pady=5, column=0, row=3)
@@ -271,10 +311,10 @@ lb_classeR = tk.Listbox(relatorioFr, width=30, height=7)
 lb_classeR.grid(padx=5, pady=5, column=0, row=4, sticky="ew", columnspan=3)
 atualizarLB(lb_classeR)
 
-b_editarR = tk.Button(relatorioFr, text="Editar", font=ft2, command=lambda: editar(lb_classeR))
-b_editarR.grid(padx=5, pady=5, column=1, row=3, sticky="ew")
-b_excluirR = tk.Button(relatorioFr, text="Excluir", font=ft2, command=lambda: (excluir(lb_classeR), atualizarLB(lb_classeR)))
-b_excluirR.grid(padx=5, pady=5, column=2, row=3, sticky="ew")
+b_editarCR = tk.Button(relatorioFr, text="Editar", font=ft2, command=lambda: editar(lb_classeR))
+b_editarCR.grid(padx=5, pady=5, column=1, row=3, sticky="ew")
+b_excluirCR = tk.Button(relatorioFr, text="Excluir", font=ft2, command=lambda: (excluir(lb_classeR), atualizarLB(lb_classeR)))
+b_excluirCR.grid(padx=5, pady=5, column=2, row=3, sticky="ew")
 
 l_persoR = tk.Label(relatorioFr, text="Personagens", font=ft2, justify="left")
 l_persoR.grid(padx=5, pady=5, column=0, row=5)
@@ -282,10 +322,10 @@ lb_persoR = tk.Listbox(relatorioFr, width=30, height=7)
 lb_persoR.grid(padx=5, pady=5, column=0, row=6, sticky="ew", columnspan=3)
 atualizarLB(lb_persoR)
 
-b_editarR = tk.Button(relatorioFr, text="Editar", font=ft2, command=lambda: editar(lb_persoR))
-b_editarR.grid(padx=5, pady=5, column=1, row=5, sticky="ew")
-b_excluirR = tk.Button(relatorioFr, text="Excluir", font=ft2, command=lambda: (excluir(lb_persoR), atualizarLB(lb_persoR)))
-b_excluirR.grid(padx=5, pady=5, column=2, row=5, sticky="ew")
+b_editarPR = tk.Button(relatorioFr, text="Editar", font=ft2, command=lambda: editar(lb_persoR))
+b_editarPR.grid(padx=5, pady=5, column=1, row=5, sticky="ew")
+b_excluirPR = tk.Button(relatorioFr, text="Excluir", font=ft2, command=lambda: (excluir(lb_persoR), atualizarLB(lb_persoR)))
+b_excluirPR.grid(padx=5, pady=5, column=2, row=5, sticky="ew")
 
 
 fichaMn.add_command(label="Arma", command=pgArma)
@@ -320,7 +360,7 @@ t_descA.grid(padx=5, pady=5, column=1, row=5, sticky="nesw")
 
 b_limparA = tk.Button(armaFr, text="Limpar", font=ft2, command=lambda: (limpar(armaFr)))
 b_limparA.grid(padx=5, pady=5, column=1, row=6, sticky="ew")
-b_salvarA = tk.Button(armaFr, text="Salvar", font=ft2, command=lambda: (salvar(armaFr), atualizarLB(lb_armaR)))
+b_salvarA = tk.Button(armaFr, text="Salvar", font=ft2, command=lambda: (salvar(armaFr), atualizarLB(lb_armaR), atualizarCB()))
 b_salvarA.grid(padx=5, pady=5, column=2, row=6, sticky="ew")
 
 
@@ -351,7 +391,7 @@ t_descC.grid(padx=5, pady=5, column=1, row=4, sticky="nesw")
 
 b_limparC = tk.Button(classeFr, text="Limpar", font=ft2, command=lambda: limpar(classeFr))
 b_limparC.grid(padx=5, pady=5, column=1, row=5, sticky="ew")
-b_salvarC = tk.Button(classeFr, text="Salvar", font=ft2, command=lambda: (salvar(classeFr), atualizarLB(lb_classeR)))
+b_salvarC = tk.Button(classeFr, text="Salvar", font=ft2, command=lambda: (salvar(classeFr), atualizarLB(lb_classeR), atualizarCB()))
 b_salvarC.grid(padx=5, pady=5, column=2, row=5, sticky="ew")
 
 
